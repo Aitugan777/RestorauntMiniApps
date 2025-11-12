@@ -64,7 +64,7 @@
             z-index: -1;
         }
         
-        h2 {
+        h1 {
             font-size: 1.7rem;
             margin-bottom: 10px;
             color: white;
@@ -156,6 +156,7 @@
         .page {
             display: none;
             animation: fadeIn 0.3s ease;
+			padding: 0px 10px;
         }
         
         .active {
@@ -163,19 +164,31 @@
         }
         
         .page-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .back-btn {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            margin-right: 15px;
-            cursor: pointer;
-            color: var(--primary-color);
-        }
+			display: flex;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+
+		.back-btn {
+			background: none;
+			border: none;
+			margin-right: 15px;
+			cursor: pointer;
+			padding: 5px;
+			border-radius: 4px;
+			transition: background-color 0.2s ease;
+		}
+
+		.back-btn:hover {
+			background-color: rgba(0, 0, 0, 0.1);
+		}
+
+		.back-icon {
+			width: 24px;
+			height: 24px;
+			object-fit: contain;
+			
+		}
         
         .form-group {
             margin-bottom: 15px;
@@ -223,7 +236,7 @@
             background-color: white;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
         }
         
         .menu-item img {
@@ -289,8 +302,8 @@
             <header>
                 <div class="header-bg"></div>
                 <div class="header-overlay"></div>
-                <h2>Plof</h2>
-                <h2>Restoraunt</h2>
+                <h1>Plof</h1>
+                <h1>Restoraunt</h1>
             </header>
             
             <div class="restaurant-info">
@@ -323,9 +336,11 @@
         <!-- Страница бронирования -->
         <div id="booking-page" class="page">
             <div class="page-header">
-                <button class="back-btn" onclick="showPage('home-page')">←</button>
-                <h2>Бронирование стола</h2>
-            </div>
+				<button class="back-btn" onclick="showPage('home-page')">
+					<img src="https://images.icon-icons.com/562/PNG/512/arrow-address-back_icon-icons.com_54065.png" alt="Назад" class="back-icon">
+				</button>
+				<h2>Бронирование стола</h2>
+			</div>
             
             <form id="booking-form">
                 <div class="form-group">
@@ -373,8 +388,10 @@
         
         <!-- Страница меню -->
         <div id="menu-page" class="page">
-            <div class="page-header">
-                <button class="back-btn" onclick="showPage('home-page')">←</button>
+             <div class="page-header">
+				<button class="back-btn" onclick="showPage('home-page')">
+					<img src="https://images.icon-icons.com/562/PNG/512/arrow-address-back_icon-icons.com_54065.png" alt="Назад" class="back-icon">
+				</button>
                 <h2>Наше меню</h2>
             </div>
             
