@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aituk Restaurant</title>
+    <title>Restoraunt Plof</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -22,94 +22,131 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        body {
-            background-color: var(--light-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
         
         .container {
             max-width: 100%;
-            padding: 15px;
+            padding: 0px;
         }
         
         header {
-            text-align: center;
+            position: relative;
             padding: 20px 0;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
             border-radius: 0 0 15px 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: left;
         }
         
-        h1 {
-            font-size: 2.2rem;
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://lip.caterme.ru/sites/default/files/styles/food_view/public/food_images/user_87247/food_670195.jpeg.jpg?itok=wMxCWeL9');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+        
+        .header-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        
+        h2 {
+            font-size: 1.7rem;
             margin-bottom: 10px;
+            color: white;
+            text-align: left;
+            padding-left: 15px;
         }
         
         .tagline {
             font-size: 1.1rem;
             font-style: italic;
             margin-bottom: 15px;
+            color: white;
+            text-align: left;
+            padding-left: 15px;
         }
         
         .restaurant-info {
             background-color: white;
             padding: 15px;
-            border-radius: 10px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         
-        .info-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .info-item i {
-            margin-right: 10px;
-            color: var(--primary-color);
-            width: 20px;
-            text-align: center;
-        }
+        .restaurant-info {
+			background-color: white;
+			padding: 15px;
+			margin-bottom: 20px;
+		}
+
+		.info-item {
+			display: flex;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+
+		.info-icon {
+			width: 20px;
+			height: 20px;
+			margin-right: 10px;
+			object-fit: contain;
+		}
         
         .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            padding: 15px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background-color: var(--accent-color);
-            color: var(--text-color);
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			width: 100%;
+		}
+
+		.btn {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			padding: 12px 20px;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 500;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.btn-primary {
+			background-color: black; /* Более темный синий */
+			color: white;
+		}
+
+		.btn-primary:hover {
+			background-color: #004085; /* Еще темнее при наведении */
+		}
+
+		.btn-secondary {
+			background-color: #d8843b; /* Более темный серый */
+			color: white;
+		}
+
+		.btn-secondary:hover {
+			background-color: #343a40; /* Еще темнее при наведении */
+		}
+
+		.btn-icon {
+			width: 20px;
+			height: 20px;
+			margin-right: 8px;
+			object-fit: contain;
+		}
         
         .page {
             display: none;
@@ -245,33 +282,37 @@
         <!-- Главная страница -->
         <div id="home-page" class="page active">
             <header>
-                <h1>Aituk</h1>
-                <p class="tagline">Изысканная кухня в уютной атмосфере</p>
+                <div class="header-bg"></div>
+                <div class="header-overlay"></div>
+                <h2>Plof</h2>
+                <h2>Restoraunt</h2>
             </header>
             
             <div class="restaurant-info">
-                <div class="info-item">
-                    <i>📍</i>
-                    <span>ул. Примерная, 123, г. Примерный</span>
-                </div>
-                <div class="info-item">
-                    <i>🕒</i>
-                    <span>Пн-Вс: 10:00 - 23:00</span>
-                </div>
-                <div class="info-item">
-                    <i>📞</i>
-                    <span>+7 (123) 456-78-90</span>
-                </div>
-            </div>
-            
+				<div class="info-item">
+					<img src="https://images.icon-icons.com/882/PNG/512/1-63_icon-icons.com_68800.png" alt="Адрес" class="info-icon">
+					<span>ул. Ресторанная, д. 88</span>
+				</div>
+				<div class="info-item">
+					<img src="https://images.icon-icons.com/3348/PNG/512/cafe_building_shop_coffee_store_icon_210214.png" alt="Время работы" class="info-icon">
+					<span>Пн-Вс: 10:00 - 23:00</span>
+				</div>
+				<div class="info-item">
+					<img src="https://images.icon-icons.com/3223/PNG/512/telephone_phone_retro_call_icon_196754.png" alt="Телефон" class="info-icon">
+					<span>+7 (996) 293 73-77</span>
+				</div>
+			</div>
+				
             <div class="buttons-container">
-                <button class="btn btn-primary" onclick="showPage('booking-page')">
-                    <i>📅</i> Забронировать стол
-                </button>
-                <button class="btn btn-secondary" onclick="showPage('menu-page')">
-                    <i>🍽️</i> Наше меню
-                </button>
-            </div>
+				<button class="btn btn-primary" onclick="showPage('booking-page')">
+					<img src="https://images.icon-icons.com/1951/PNG/512/16_122653.png" alt="Бронь" class="btn-icon">
+					Забронировать стол
+				</button>
+				<button class="btn btn-secondary" onclick="showPage('menu-page')">
+					<img src="https://images.icon-icons.com/3223/PNG/512/restaurant_tablecloth_cutlery_spoon_fork_icon_196752.png" alt="Меню" class="btn-icon">
+					Наше меню
+				</button>
+			</div>
         </div>
         
         <!-- Страница бронирования -->
@@ -376,7 +417,7 @@
             <div class="confirmation">
                 <div class="confirmation-icon">✓</div>
                 <h2>Бронирование подтверждено!</h2>
-                <p>Мы ждем вас в ресторане Aituk в указанное время.</p>
+                <p>Мы ждем вас в ресторане Restoraunt Plof в указанное время.</p>
                 <p>Скоро мы отправим подтверждение в этот чат.</p>
                 <button class="btn btn-primary" onclick="showPage('home-page')" style="margin-top: 20px;">
                     Вернуться на главную
