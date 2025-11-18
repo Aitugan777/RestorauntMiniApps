@@ -306,13 +306,10 @@
     }
     
     sportButtons.innerHTML = sports.map(sport => {
-      // Определяем background image в зависимости от вида спорта
-      const bgImage = sport.name.toLowerCase().includes('куреш') ? 'kuresh0.jpg' : 'volleyball0.jpg';
-      
       return `
         <button class="btn" 
                 data-sport="${sport.id}" 
-                style="background-image: url('${bgImage}'); background-size: cover; background-position: center; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #fff; border-radius: 18px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
+                style="background-image: background-size: cover; background-position: center; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #fff; border-radius: 18px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
           ${sport.name}
         </button>
       `;
