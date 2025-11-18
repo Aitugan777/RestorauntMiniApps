@@ -259,7 +259,7 @@
   const tg = window.Telegram.WebApp;
   tg.expand();
 
-  // Базовый URL API - замените на ваш реальный URL при развертывании
+  // Базовый URL API
   const API_BASE = 'https://aituk.ru/api/training';
   const sportView = document.getElementById('sportView');
   const trainingView = document.getElementById('trainingView');
@@ -280,12 +280,34 @@
     view.scrollIntoView({behavior: 'smooth'});
   }
 
+  // Улучшенная функция fetch с обработкой CORS
+  async function apiFetch(url, options = {}) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+
   // Загрузка видов спорта с сервера
   async function loadSports() {
     try {
-      const response = await fetch(`${API_BASE}/sports`);
-      if (!response.ok) throw new Error('Ошибка загрузки видов спорта');
+      sportButtons.innerHTML = "<div class='loading'>Загрузка видов спорта...</div>";
       
+      const response = await apiFetch(`${API_BASE}/sports`);
       sports = await response.json();
       renderSports();
     } catch (error) {
@@ -296,6 +318,7 @@
         { id: 2, name: "Волейбол", description: "Командная игра" }
       ];
       renderSports();
+      showMessage('Используются локальные данные', 'error');
     }
   }
 
@@ -306,21 +329,44 @@
     }
     
     sportButtons.innerHTML = sports.map(sport => {
+      // Определяем background image в зависимости от вида спорта
+      const sportName = sport.name.toLowerCase();
+      let bgImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'; // дефолтный градиент
+      
+      if (sportName.includes('куреш') || sportName.includes('борьб')) {
+        bgImage = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+      } else if (sportName.includes('волей') || sportName.includes('волейбол')) {
+        bgImage = 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+      } else if (sportName.includes('футбол') || sportName.includes('футб')) {
+        bgImage = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+      } else if (sportName.includes('баскет') || sportName.includes('баскетбол')) {
+        bgImage = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+      }
+      
       return `
-        <button class="btn" 
+        <button class="btn sport-btn" 
                 data-sport="${sport.id}" 
-                style="background-image: background-size: cover; background-position: center; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #fff; border-radius: 18px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
+                style="background: ${bgImage}; background-size: cover; background-position: center; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #fff; border-radius: 18px; text-shadow: 0 0 10px rgba(0,0,0,0.8); border: none; cursor: pointer; transition: transform 0.2s;">
           ${sport.name}
         </button>
       `;
     }).join('');
     
     // Добавляем обработчики событий для кнопок спорта
-    document.querySelectorAll('[data-sport]').forEach(btn => {
-      btn.onclick = () => {
+    document.querySelectorAll('.sport-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
         selectedSport = sports.find(s => s.id == btn.dataset.sport);
         loadTrainings();
-      };
+      });
+      
+      // Добавляем hover эффекты
+      btn.addEventListener('mouseenter', () => {
+        btn.style.transform = 'translateY(-2px) scale(1.02)';
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translateY(0) scale(1)';
+      });
     });
   }
 
@@ -331,14 +377,19 @@
     show(trainingView);
     
     try {
-      const response = await fetch(`${API_BASE}/trainings/${selectedSport.id}`);
-      if (!response.ok) throw new Error('Ошибка загрузки тренировок');
-      
+      const response = await apiFetch(`${API_BASE}/trainings/${selectedSport.id}`);
       const trainings = await response.json();
       renderTrainings(trainings);
     } catch (error) {
       console.error('Ошибка загрузки тренировок:', error);
-      trainingList.innerHTML = `<div class="error">Ошибка загрузки тренировок: ${error.message}</div>`;
+      trainingList.innerHTML = `
+        <div class="error">
+          Ошибка загрузки тренировок
+          <button class="btn small" onclick="loadTrainings()" style="margin-top: 10px;">
+            Попробовать снова
+          </button>
+        </div>
+      `;
     }
   }
 
@@ -349,37 +400,58 @@
     }
     
     trainingList.innerHTML = trainings.map(training => {
-      const startTime = new Date(training.startTime).toLocaleTimeString('ru-RU', {
+      const startTime = new Date(training.startTime);
+      const endTime = new Date(training.endTime);
+      
+      const timeString = startTime.toLocaleTimeString('ru-RU', {
         hour: '2-digit',
         minute: '2-digit'
       });
       
-      const date = new Date(training.startTime).toLocaleDateString('ru-RU', {
+      const date = startTime.toLocaleDateString('ru-RU', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
       });
       
+      const duration = Math.round((endTime - startTime) / (1000 * 60)); // в минутах
       const spotsLeft = training.maxParticipants - training.currentParticipants;
       const isFull = spotsLeft <= 0;
+      const almostFull = spotsLeft <= 3 && spotsLeft > 0;
       
       return `
-        <div class="training-item">
+        <div class="training-item" style="border-left: 4px solid ${isFull ? '#f44336' : almostFull ? '#ff9800' : '#4CAF50'};">
           <div class="title">${training.sportTypeName}</div>
-          <div class="muted">Дата: ${date}</div>
-          <div class="muted">Время: ${startTime}</div>
-          <div class="muted">Мест свободно: ${isFull ? 'нет' : spotsLeft}</div>
+          <div class="muted">📅 ${date}</div>
+          <div class="muted">⏰ ${timeString} (${duration} мин.)</div>
+          <div class="muted">👥 ${training.currentParticipants}/${training.maxParticipants} участников</div>
+          <div class="muted" style="color: ${isFull ? '#f44336' : almostFull ? '#ff9800' : '#4CAF50'}">
+            ${isFull ? '❌ Запись закрыта' : almostFull ? `⚠️ Осталось ${spotsLeft} мест` : `✅ Свободно ${spotsLeft} мест`}
+          </div>
           ${isFull ? 
             '<div class="full">Запись закрыта</div>' : 
-            `<button class="btn small" 
+            `<button class="btn small select-training" 
                      data-id="${training.id}" 
-                     data-name="${training.sportTypeName}">
-               Выбрать
+                     data-name="${training.sportTypeName}"
+                     style="margin-top: 12px;">
+               🎯 Выбрать
              </button>`
           }
         </div>
       `;
     }).join('');
+    
+    // Добавляем обработчики для кнопок выбора тренировки
+    document.querySelectorAll('.select-training').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        selectedTraining = {
+          id: parseInt(btn.dataset.id),
+          name: btn.dataset.name
+        };
+        trainingTitle.textContent = `Бронирование: ${selectedTraining.name}`;
+        show(bookingView);
+      });
+    });
   }
 
   // Отправка данных бронирования на сервер
@@ -391,22 +463,25 @@
     // Валидация
     if (!name) {
       showMessage('Введите ФИО', 'error');
+      document.getElementById('fio').focus();
       return;
     }
     
     if (!phone) {
       showMessage('Введите номер телефона', 'error');
+      document.getElementById('phone').focus();
       return;
     }
     
     if (isNaN(people) || people < 1) {
       showMessage('Введите корректное количество человек', 'error');
+      document.getElementById('people').focus();
       return;
     }
     
     const confirmBtn = document.getElementById('confirmBtn');
     confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Отправка...';
+    confirmBtn.textContent = '⏳ Отправка...';
     
     try {
       const bookingData = {
@@ -417,18 +492,15 @@
         NumberOfPeople: people
       };
       
-      const response = await fetch(`${API_BASE}/booking`, {
+      const response = await apiFetch(`${API_BASE}/booking`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(bookingData)
       });
       
       const result = await response.json();
       
       if (result.success) {
-        showMessage(result.message, 'success');
+        showMessage(`✅ ${result.message}`, 'success');
         // Очищаем форму через 2 секунды и возвращаемся к выбору спорта
         setTimeout(() => {
           document.getElementById('fio').value = '';
@@ -436,44 +508,59 @@
           document.getElementById('people').value = '1';
           bookingMessage.innerHTML = '';
           show(sportView);
+          // Перезагружаем спорты чтобы обновить количество мест
+          loadSports();
         }, 2000);
       } else {
-        showMessage(result.message, 'error');
+        showMessage(`❌ ${result.message}`, 'error');
       }
     } catch (error) {
       console.error('Ошибка отправки:', error);
-      showMessage(`Ошибка отправки: ${error.message}`, 'error');
+      showMessage('❌ Ошибка соединения с сервером', 'error');
     } finally {
       confirmBtn.disabled = false;
-      confirmBtn.textContent = 'Записаться';
+      confirmBtn.textContent = '📝 Записаться';
     }
   }
 
   function showMessage(text, type) {
     bookingMessage.innerHTML = `<div class="message ${type}">${text}</div>`;
+    // Автоскрытие сообщений через 5 секунд (кроме успешных)
+    if (type !== 'success') {
+      setTimeout(() => {
+        if (bookingMessage.innerHTML.includes(text)) {
+          bookingMessage.innerHTML = '';
+        }
+      }, 5000);
+    }
   }
 
   // Обработчики событий
-  document.getElementById('backToSport').onclick = () => show(sportView);
-  document.getElementById('backToTrainings').onclick = () => show(trainingView);
-  document.getElementById('confirmBtn').onclick = submitBooking;
+  document.getElementById('backToSport').addEventListener('click', () => show(sportView));
+  document.getElementById('backToTrainings').addEventListener('click', () => show(trainingView));
+  document.getElementById('confirmBtn').addEventListener('click', submitBooking);
 
-  // Обработчик выбора тренировки
-  trainingList.onclick = e => {
-    const btn = e.target.closest("button[data-id]"); 
-    if (!btn) return; 
-    
-    selectedTraining = {
-      id: parseInt(btn.dataset.id),
-      name: btn.dataset.name
-    }; 
-    
-    trainingTitle.textContent = `Бронирование: ${selectedTraining.name}`; 
-    show(bookingView); 
-  };
+  // Обработка Enter в форме бронирования
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && bookingView.style.display !== 'none') {
+      submitBooking();
+    }
+  });
 
   // Инициализация при загрузке
-  loadSports();
+  document.addEventListener('DOMContentLoaded', () => {
+    loadSports();
+    
+    // Показываем версию приложения
+    console.log('Yama Sport App v1.0 - API:', API_BASE);
+  });
+
+  // Глобальные функции для отладки
+  window.debugApp = {
+    reloadSports: loadSports,
+    showView: show,
+    getState: () => ({ selectedSport, selectedTraining, sports })
+  };
 </script>
 </body>
 </html>
