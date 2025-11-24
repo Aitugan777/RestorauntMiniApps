@@ -1,479 +1,649 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>Yama Sport — Запись на тренировки</title>
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --color-bg: #000;
-      --color-text: #fff;
-      --color-muted: #aaa;
-      --color-accent: #fff;
-      --color-button-bg: rgba(255,255,255,0.07);
-      --divider-color: #333;
-      --sport-label-color: #000;
-      --training-title-color: #fff;
-      --success-color: #4CAF50;
-      --error-color: #f44336;
-    }
-
-    html, body {
-      margin:0;
-      padding:0;
-      width:100%;
-      height:100%;
-      font-family:'Inter', sans-serif;
-      background: var(--color-bg);
-      display:flex;
-      justify-content:center;
-      align-items:flex-start;
-      overflow:auto;
-      padding-top:32px;
-      color: var(--color-text);
-      scroll-behavior: smooth;
-    }
-
-    .app {
-      width:420px;
-      max-width:95%;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.9) 100%), url('bg0.jpg') center/cover no-repeat;
-      border-radius:20px;
-      padding:24px;
-      box-sizing:border-box;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-      max-height: 90vh;
-      overflow-y: auto;
-      scroll-behavior: smooth;
-    }
-
-    header h1 {
-      margin:0;
-      font-size:38px;
-      color: var(--color-accent);
-      font-weight:800;
-      text-align:center;
-      font-family: 'Oswald', sans-serif;
-      letter-spacing:2px;
-      text-transform: uppercase;
-      text-shadow: none;
-    }
-
-    h2, h3 {
-      text-align: center;
-      margin: 10px 0;
-      color: var(--color-text);
-    }
-
-    .section { width:100%; margin-top:24px; }
-
-    .btn {
-      width:100%;
-      padding:18px;
-      font-size:22px;
-      font-weight:700;
-      border-radius:16px;
-      border:none;
-      background: var(--color-button-bg);
-      color: var(--color-text);
-      cursor:pointer;
-      backdrop-filter: blur(6px);
-      margin-top:12px;
-      transition: background 0.25s, transform 0.2s;
-    }
-
-    .btn:hover {
-      background: rgba(255,255,255,0.12);
-      transform: translateY(-2px);
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .btn.small { 
-      width:auto; 
-      padding:10px 16px; 
-      font-size:16px; 
-      margin-top: 0;
-    }
-
-    .sport-buttons button {
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
-      height:130px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:32px;
-      font-weight:800;
-      color:#fff;
-      border-radius:18px;
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
-      filter:none;
-      transition:none;
-      margin-top:16px;
-    }
-
-    .divider { width:100%; height:2px; background: var(--divider-color); margin:20px 0; border-radius:1px; }
-    .footer { width:100%; text-align:center; color: var(--color-muted); font-size:14px; margin-top:12px; }
-
-    .training-item { 
-      padding:18px; 
-      border-radius:16px; 
-      background:rgba(0,0,0,0.5); 
-      margin-top:16px; 
-      box-shadow:0 4px 12px rgba(0,0,0,0.5); 
-    }
-    .training-item .title { 
-      font-size:22px; 
-      font-weight:700; 
-      margin-bottom:8px; 
-      color: var(--training-title-color); 
-    }
-    .training-item .muted { 
-      font-size:16px; 
-      color: var(--color-muted); 
-      margin-bottom:6px; 
-    }
-
-    label { 
-      display:block; 
-      margin-top:14px; 
-      font-size:18px; 
-      font-weight:500; 
-    }
-    
-    input { 
-      width: calc(100% - 28px); 
-      padding:14px; 
-      border-radius:12px; 
-      border:none; 
-      margin-top:6px; 
-      font-size:18px; 
-      background: rgba(0,0,0,0.6); 
-      color:#fff; 
-      box-sizing:border-box; 
-    }
-
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: var(--color-muted);
-      font-size: 16px;
-    }
-
-    .message {
-      padding: 15px;
-      border-radius: 12px;
-      margin: 15px 0;
-      text-align: center;
-      font-weight: 500;
-    }
-
-    .success {
-      background: rgba(76, 175, 80, 0.2);
-      border: 1px solid var(--success-color);
-      color: var(--success-color);
-    }
-
-    .error {
-      background: rgba(244, 67, 54, 0.2);
-      border: 1px solid var(--error-color);
-      color: var(--error-color);
-    }
-
-    .full {
-      background: rgba(244, 67, 54, 0.3);
-      border: 1px solid var(--error-color);
-      color: var(--error-color);
-      padding: 10px;
-      border-radius: 8px;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автошкола - Запись на вождение</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 480px;
+            margin: 0 auto;
+            padding-bottom: 70px;
+        }
+        
+        .container {
+            padding: 15px;
+        }
+        
+        /* Навигация */
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background-color: #fff;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 12px;
+            color: #888;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-tab.active {
+            color: #2c7be5;
+        }
+        
+        .nav-icon {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        /* Страницы */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c7be5;
+        }
+        
+        /* Календарь */
+        .calendar {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .calendar-month {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .calendar-nav-btn {
+            background: #f0f0f0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #777;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        
+        .calendar-day {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: #f0f0f0;
+        }
+        
+        .calendar-day.selected {
+            background: #2c7be5;
+            color: white;
+        }
+        
+        .calendar-day.other-month {
+            color: #ccc;
+        }
+        
+        /* Слоты для записи */
+        .time-slots {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .time-slots-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c7be5;
+        }
+        
+        .time-slot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .time-slot:last-child {
+            border-bottom: none;
+        }
+        
+        .time-slot-info {
+            font-size: 16px;
+        }
+        
+        .time-slot-status {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #2c7be5;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1a68d1;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Уведомления */
+        .notification {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid #2c7be5;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .notification-date {
+            font-size: 12px;
+            color: #777;
+            margin-bottom: 8px;
+        }
+        
+        .notification-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        /* Профиль */
+        .profile-section {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .profile-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c7be5;
+        }
+        
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #777;
+        }
+        
+        .info-value {
+            font-weight: bold;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c7be5;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+        
+        .booking-info {
+            flex: 1;
+        }
+        
+        .booking-date {
+            font-weight: bold;
+        }
+        
+        .booking-time {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        .btn-call {
+            background: #2c7be5;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<div class="app" id="app">
-
-  <!-- VIEW 1: Выбор спорта -->
-  <div id="sportView">
-    <header>
-      <h1>Yama Sport</h1>
-      <div class="divider"></div>
-      <h3>Выберите вид спорта</h3>
-    </header>
-
-    <div class="section sport-buttons" id="sportButtons">
-      <div class="loading">Загрузка видов спорта...</div>
+    <!-- Страница Вождение -->
+    <div id="driving-page" class="page active">
+        <div class="container">
+            <h1 class="page-title">Вождение</h1>
+            
+            <div class="calendar">
+                <div class="calendar-header">
+                    <div class="calendar-month">Май 2023</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn">←</button>
+                        <button class="calendar-nav-btn">→</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-weekdays">
+                    <div>Пн</div>
+                    <div>Вт</div>
+                    <div>Ср</div>
+                    <div>Чт</div>
+                    <div>Пт</div>
+                    <div>Сб</div>
+                    <div>Вс</div>
+                </div>
+                
+                <div class="calendar-days">
+                    <!-- Сгенерированные дни календаря -->
+                    <div class="calendar-day other-month">29</div>
+                    <div class="calendar-day other-month">30</div>
+                    <div class="calendar-day">1</div>
+                    <div class="calendar-day">2</div>
+                    <div class="calendar-day">3</div>
+                    <div class="calendar-day">4</div>
+                    <div class="calendar-day">5</div>
+                    <div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div>
+                    <div class="calendar-day">8</div>
+                    <div class="calendar-day">9</div>
+                    <div class="calendar-day">10</div>
+                    <div class="calendar-day">11</div>
+                    <div class="calendar-day">12</div>
+                    <div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div>
+                    <div class="calendar-day">15</div>
+                    <div class="calendar-day selected">16</div>
+                    <div class="calendar-day">17</div>
+                    <div class="calendar-day">18</div>
+                    <div class="calendar-day">19</div>
+                    <div class="calendar-day">20</div>
+                    <div class="calendar-day">21</div>
+                    <div class="calendar-day">22</div>
+                    <div class="calendar-day">23</div>
+                    <div class="calendar-day">24</div>
+                    <div class="calendar-day">25</div>
+                    <div class="calendar-day">26</div>
+                    <div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    <div class="calendar-day">31</div>
+                    <div class="calendar-day other-month">1</div>
+                </div>
+            </div>
+            
+            <div class="time-slots">
+                <h2 class="time-slots-title">16 мая, среда</h2>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>09:00 - 10:30</div>
+                        <div class="time-slot-status">Свободно</div>
+                    </div>
+                    <button class="btn btn-primary">Записаться</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>10:30 - 12:00</div>
+                        <div class="time-slot-status">Занято</div>
+                    </div>
+                    <button class="btn btn-secondary" disabled>Недоступно</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>12:00 - 13:30</div>
+                        <div class="time-slot-status">Свободно</div>
+                    </div>
+                    <button class="btn btn-primary">Записаться</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>13:30 - 15:00</div>
+                        <div class="time-slot-status">Свободно</div>
+                    </div>
+                    <button class="btn btn-primary">Записаться</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>15:00 - 16:30</div>
+                        <div class="time-slot-status">Занято</div>
+                    </div>
+                    <button class="btn btn-secondary" disabled>Недоступно</button>
+                </div>
+                
+                <div class="time-slot">
+                    <div class="time-slot-info">
+                        <div>16:30 - 18:00</div>
+                        <div class="time-slot-status">Свободно</div>
+                    </div>
+                    <button class="btn btn-primary">Записаться</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Страница Уведомления -->
+    <div id="notifications-page" class="page">
+        <div class="container">
+            <h1 class="page-title">Уведомления</h1>
+            
+            <div class="notification">
+                <div class="notification-title">Подтверждение записи</div>
+                <div class="notification-date">15 мая 2023, 14:30</div>
+                <div class="notification-text">Инструктор подтвердил вашу запись на вождение 16 мая с 12:00 до 13:30</div>
+            </div>
+            
+            <div class="notification">
+                <div class="notification-title">Напоминание о вождении</div>
+                <div class="notification-date">14 мая 2023, 18:15</div>
+                <div class="notification-text">Напоминаем о занятии по вождению завтра в 09:00. Не забудьте взять с собой документы.</div>
+            </div>
+            
+            <div class="notification">
+                <div class="notification-title">Изменение в расписании</div>
+                <div class="notification-date">12 мая 2023, 10:45</div>
+                <div class="notification-text">В связи с техническими работами, вождение 13 мая переносится на 14 мая в то же время.</div>
+            </div>
+            
+            <div class="notification">
+                <div class="notification-title">Новое сообщение</div>
+                <div class="notification-date">10 мая 2023, 16:20</div>
+                <div class="notification-text">Ваш инструктор оставил комментарий к последнему занятию. Посмотреть можно в разделе "Профиль".</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Страница Профиль -->
+    <div id="profile-page" class="page">
+        <div class="container">
+            <h1 class="page-title">Профиль</h1>
+            
+            <div class="profile-section">
+                <h2 class="profile-title">Личная информация</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">ФИО:</span>
+                        <span class="info-value">Иванов Алексей Петрович</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Телефон:</span>
+                        <span class="info-value">+7 (912) 345-67-89</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h2 class="profile-title">Инструктор</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">ФИО:</span>
+                        <span class="info-value">Сидоров Михаил Васильевич</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Телефон:</span>
+                        <span class="info-value">+7 (912) 987-65-43</span>
+                    </div>
+                    <a href="tel:+79129876543" class="btn-call">Позвонить инструктору</a>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h2 class="profile-title">Автомобиль</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="info-label">Марка и модель:</span>
+                        <span class="info-value">Kia Rio</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Гос. номер:</span>
+                        <span class="info-value">А123БВ 777</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h2 class="profile-title">Статистика</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Всего вождений</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Доступно</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-section">
+                <h2 class="profile-title">Запланированные вождения</h2>
+                <div class="profile-info">
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <div class="booking-date">16 мая, среда</div>
+                            <div class="booking-time">12:00 - 13:30</div>
+                        </div>
+                        <button class="btn btn-secondary">Отменить</button>
+                    </div>
+                    
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <div class="booking-date">18 мая, пятница</div>
+                            <div class="booking-time">13:30 - 15:00</div>
+                        </div>
+                        <button class="btn btn-secondary">Отменить</button>
+                    </div>
+                    
+                    <div class="booking-item">
+                        <div class="booking-info">
+                            <div class="booking-date">20 мая, воскресенье</div>
+                            <div class="booking-time">16:30 - 18:00</div>
+                        </div>
+                        <button class="btn btn-secondary">Отменить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Навигация -->
+    <div class="nav-tabs">
+        <a href="#" class="nav-tab active" data-page="driving-page">
+            <span class="nav-icon">🚗</span>
+            <span>Вождение</span>
+        </a>
+        <a href="#" class="nav-tab" data-page="notifications-page">
+            <span class="nav-icon">🔔</span>
+            <span>Уведомления</span>
+        </a>
+        <a href="#" class="nav-tab" data-page="profile-page">
+            <span class="nav-icon">👤</span>
+            <span>Профиль</span>
+        </a>
     </div>
 
-    <div class="divider"></div>
-    <div class="footer">by Aituk</div>
-  </div>
-
-  <!-- VIEW 2: Список тренировок -->
-  <div id="trainingView" style="display:none">
-    <button id="backToSport" class="small btn">← Назад</button>
-    <div class="divider"></div>
-    <h2 id="trainingSportName">Тренировки</h2>
-    <div id="trainingList"></div>
-    <div class="divider"></div>
-    <div class="footer">Yama Sport</div>
-  </div>
-
-  <!-- VIEW 3: Бронирование -->
-  <div id="bookingView" style="display:none">
-    <button id="backToTrainings" class="small btn">← Назад</button>
-    <div class="divider"></div>
-    <h2 id="trainingTitle">Бронирование</h2>
-
-    <label>ФИО</label>
-    <input id="fio" placeholder="Иванов Иван" />
-
-    <label>Номер телефона</label>
-    <input id="phone" placeholder="+7 900 000 00 00" />
-
-    <label>Количество человек</label>
-    <input id="people" type="number" min="1" value="1" />
-
-    <div id="bookingMessage"></div>
-    <button id="confirmBtn" class="btn" style="margin-top:20px">Записаться</button>
-    <div class="divider"></div>
-    <div class="footer">Yama Sport</div>
-  </div>
-
-</div>
-
-<script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
-
-  // Базовый URL API - замените на ваш реальный URL при развертывании
-  const API_BASE = 'https://aituk.ru/api/training';
-  const sportView = document.getElementById('sportView');
-  const trainingView = document.getElementById('trainingView');
-  const bookingView = document.getElementById('bookingView');
-  const trainingList = document.getElementById('trainingList');
-  const trainingTitle = document.getElementById('trainingTitle');
-  const trainingSportName = document.getElementById('trainingSportName');
-  const sportButtons = document.getElementById('sportButtons');
-  const bookingMessage = document.getElementById('bookingMessage');
-
-  let selectedSport = null;
-  let selectedTraining = null;
-  let sports = [];
-
-  function show(view){
-    [sportView, trainingView, bookingView].forEach(x => x.style.display = 'none');
-    view.style.display = 'block';
-    view.scrollIntoView({behavior: 'smooth'});
-  }
-
-  // Загрузка видов спорта с сервера
-  async function loadSports() {
-    try {
-      const response = await fetch(`${API_BASE}/sports`);
-      if (!response.ok) throw new Error('Ошибка загрузки видов спорта');
-      
-      sports = await response.json();
-      renderSports();
-    } catch (error) {
-      console.error('Ошибка загрузки спортов:', error);
-      // Fallback данные на случай ошибки
-      sports = [
-        { id: 1, name: "Куреш", description: "Национальная борьба" },
-        { id: 2, name: "Волейбол", description: "Командная игра" }
-      ];
-      renderSports();
-    }
-  }
-
-  function renderSports() {
-    if (sports.length === 0) {
-      sportButtons.innerHTML = '<div class="muted">Нет доступных видов спорта</div>';
-      return;
-    }
-    
-    sportButtons.innerHTML = sports.map(sport => {
-      return `
-        <button class="btn" 
-                data-sport="${sport.id}" 
-                style="background-image: background-size: cover; background-position: center; height: 130px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #fff; border-radius: 18px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">
-          ${sport.name}
-        </button>
-      `;
-    }).join('');
-    
-    // Добавляем обработчики событий для кнопок спорта
-    document.querySelectorAll('[data-sport]').forEach(btn => {
-      btn.onclick = () => {
-        selectedSport = sports.find(s => s.id == btn.dataset.sport);
-        loadTrainings();
-      };
-    });
-  }
-
-  // Загрузка тренировок для выбранного вида спорта
-  async function loadTrainings() {
-    trainingList.innerHTML = "<div class='loading'>Загрузка тренировок...</div>";
-    trainingSportName.textContent = `Тренировки - ${selectedSport.name}`;
-    show(trainingView);
-    
-    try {
-      const response = await fetch(`${API_BASE}/trainings/${selectedSport.id}`);
-      if (!response.ok) throw new Error('Ошибка загрузки тренировок');
-      
-      const trainings = await response.json();
-      renderTrainings(trainings);
-    } catch (error) {
-      console.error('Ошибка загрузки тренировок:', error);
-      trainingList.innerHTML = `<div class="error">Ошибка загрузки тренировок: ${error.message}</div>`;
-    }
-  }
-
-  function renderTrainings(trainings) {
-    if (trainings.length === 0) {
-      trainingList.innerHTML = '<div class="muted">Нет доступных тренировок</div>';
-      return;
-    }
-    
-    trainingList.innerHTML = trainings.map(training => {
-      const startTime = new Date(training.startTime).toLocaleTimeString('ru-RU', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      
-      const date = new Date(training.startTime).toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      });
-      
-      const spotsLeft = training.maxParticipants - training.currentParticipants;
-      const isFull = spotsLeft <= 0;
-      
-      return `
-        <div class="training-item">
-          <div class="title">${training.sportTypeName}</div>
-          <div class="muted">Дата: ${date}</div>
-          <div class="muted">Время: ${startTime}</div>
-          <div class="muted">Мест свободно: ${isFull ? 'нет' : spotsLeft}</div>
-          ${isFull ? 
-            '<div class="full">Запись закрыта</div>' : 
-            `<button class="btn small" 
-                     data-id="${training.id}" 
-                     data-name="${training.sportTypeName}">
-               Выбрать
-             </button>`
-          }
-        </div>
-      `;
-    }).join('');
-  }
-
-  // Отправка данных бронирования на сервер
-  async function submitBooking() {
-    const name = document.getElementById('fio').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const people = parseInt(document.getElementById('people').value);
-    
-    // Валидация
-    if (!name) {
-      showMessage('Введите ФИО', 'error');
-      return;
-    }
-    
-    if (!phone) {
-      showMessage('Введите номер телефона', 'error');
-      return;
-    }
-    
-    if (isNaN(people) || people < 1) {
-      showMessage('Введите корректное количество человек', 'error');
-      return;
-    }
-    
-    const confirmBtn = document.getElementById('confirmBtn');
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Отправка...';
-    
-    try {
-      const bookingData = {
-        TrainingId: selectedTraining.id,
-        ChatId: tg.initDataUnsafe?.user?.id || 0,
-        Name: name,
-        PhoneNumber: phone,
-        NumberOfPeople: people
-      };
-      
-      const response = await fetch(`${API_BASE}/booking`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData)
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        showMessage(result.message, 'success');
-        // Очищаем форму через 2 секунды и возвращаемся к выбору спорта
-        setTimeout(() => {
-          document.getElementById('fio').value = '';
-          document.getElementById('phone').value = '';
-          document.getElementById('people').value = '1';
-          bookingMessage.innerHTML = '';
-          show(sportView);
-        }, 2000);
-      } else {
-        showMessage(result.message, 'error');
-      }
-    } catch (error) {
-      console.error('Ошибка отправки:', error);
-      showMessage(`Ошибка отправки: ${error.message}`, 'error');
-    } finally {
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = 'Записаться';
-    }
-  }
-
-  function showMessage(text, type) {
-    bookingMessage.innerHTML = `<div class="message ${type}">${text}</div>`;
-  }
-
-  // Обработчики событий
-  document.getElementById('backToSport').onclick = () => show(sportView);
-  document.getElementById('backToTrainings').onclick = () => show(trainingView);
-  document.getElementById('confirmBtn').onclick = submitBooking;
-
-  // Обработчик выбора тренировки
-  trainingList.onclick = e => {
-    const btn = e.target.closest("button[data-id]"); 
-    if (!btn) return; 
-    
-    selectedTraining = {
-      id: parseInt(btn.dataset.id),
-      name: btn.dataset.name
-    }; 
-    
-    trainingTitle.textContent = `Бронирование: ${selectedTraining.name}`; 
-    show(bookingView); 
-  };
-
-  // Инициализация при загрузке
-  loadSports();
-</script>
+    <script>
+        // Переключение между страницами
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Убираем активный класс у всех вкладок
+                document.querySelectorAll('.nav-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Добавляем активный класс текущей вкладке
+                this.classList.add('active');
+                
+                // Скрываем все страницы
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // Показываем выбранную страницу
+                const pageId = this.getAttribute('data-page');
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+        
+        // Выбор дня в календаре
+        document.querySelectorAll('.calendar-day:not(.other-month)').forEach(day => {
+            day.addEventListener('click', function() {
+                document.querySelectorAll('.calendar-day').forEach(d => {
+                    d.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // Здесь можно добавить логику загрузки слотов для выбранного дня
+            });
+        });
+        
+        // Запись на вождение
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('Запись успешно оформлена!');
+            });
+        });
+        
+        // Отмена записи
+        document.querySelectorAll('.booking-item .btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('Вы уверены, что хотите отменить запись?')) {
+                    this.closest('.booking-item').remove();
+                    alert('Запись отменена');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
